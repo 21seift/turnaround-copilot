@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnaround tool — what would you do?</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0B1015;--panel:#141C24;--panel2:#1B2732;--line:#2A3A47;--text:#DCE6ED;
+--dim:#7E93A3;--cyan:#55C7DE;--green:#35D08A;--amber:#FFB020;--red:#FF4D4F;
+--sans:"Barlow Condensed",Arial Narrow,sans-serif;--mono:"IBM Plex Mono",monospace}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+font-size:18px;line-height:1.45}
+.wrap{max-width:660px;margin:0 auto;padding:18px 16px 70px}
+h1{font-size:25px;margin:0 0 4px}
+.sub{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.12em;
+text-transform:uppercase}
+.card{background:var(--panel);border:1px solid var(--line);margin:14px 0}
+.card-b{padding:16px}
+.consent{white-space:pre-line;color:var(--dim);font-size:16px}
+button{background:var(--cyan);color:#04161C;border:none;font-family:var(--mono);
+font-size:13px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;
+padding:14px 18px;cursor:pointer;width:100%;margin-top:10px}
+button.ghost{background:transparent;color:var(--dim);border:1px solid var(--line)}
+button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.prog{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.1em;
+display:flex;justify-content:space-between;margin-bottom:8px}
+.pbar{height:3px;background:var(--line);margin-bottom:16px}
+.pbar div{height:3px;background:var(--cyan)}
+.sit{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.06em;
+margin-bottom:10px}
+.chip{display:inline-block;border:1px solid var(--line);padding:2px 8px;margin-right:6px}
+.chip.sf{border-color:var(--red);color:var(--red)}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+text-transform:uppercase;padding:4px 9px;margin-bottom:10px}
+.b-safety{background:var(--red);color:#160406;font-weight:600}
+.b-recover{background:var(--green);color:#04160E;font-weight:600}
+.b-manage{background:var(--amber);color:#1A1000;font-weight:600}
+h2{font-size:21px;margin:0 0 12px;line-height:1.25}
+ul.acts{list-style:none;margin:0;padding:0}
+ul.acts li{padding:7px 0;border-top:1px solid var(--line);font-size:17px}
+.q{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.q p{font-size:17px;margin:0 0 9px}
+.opts{display:grid;gap:7px}
+.opt{display:block;border:1px solid var(--line);padding:11px 13px;cursor:pointer;
+font-size:16px;background:var(--panel2)}
+.opt:hover{border-color:var(--dim)}
+.opt input{margin-right:9px;accent-color:var(--cyan)}
+.opt.sel{border-color:var(--cyan);background:rgba(85,199,222,.10)}
+textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+color:var(--text);font-family:var(--sans);font-size:16px;padding:10px;min-height:64px}
+textarea:focus{outline:2px solid var(--cyan);outline-offset:-1px}
+.nav{display:flex;gap:9px;margin-top:14px}
+.nav button{margin:0}
+.done{text-align:center;padding:26px 0}
+.done .big{font-size:30px;font-weight:700;margin-bottom:8px}
+label.scale{display:flex;justify-content:space-between;font-family:var(--mono);
+font-size:11px;color:var(--dim);margin-top:4px}
+@media print{body{background:#fff;color:#000}.nav,button{display:none}
+.card{border-color:#999;page-break-inside:avoid}}
+</style></head><body><div class="wrap" id="app"></div>
+<script>
+const CASES = [{"n": 1, "code": "93", "label": "late inbound", "minutes": 3.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 3 min late -- late inbound. You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Work out the new realistic off-block time and use that from now on.", "Warn the next turn on this aircraft that it may be late.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 2, "code": "34", "label": "steps not powering (GSE)", "minutes": 15.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 15 min late -- steps not powering (GSE). You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: ring the team leader, the ramp allocator and the office for replacement steps.", "Report the fault to equipment control and ask for other steps or power.", "Keep a way open for passengers to get off.", "Tell the tug driver and headset now that the departure may be late.", "Tell the office you may be free soon -- you could be sent to another turn.", "Keep everything else moving that can still move.", "Get the new slot confirmed as soon as you know the delay."]}, {"n": 3, "code": "81", "label": "slot", "minutes": 16.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 16 min late -- slot. You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["Push right up to the slot limit. Keep the fuel and water going.", "Tell the office your stand may free up late.", "Tell the tug driver and headset now that the departure may be late.", "Tell the office you may be free soon -- you could be sent to another turn.", "Keep everything else moving that can still move.", "Get the new slot confirmed as soon as you know the delay."]}, {"n": 4, "code": "04", "label": "PRM pickup (inbound)", "minutes": 5.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 5 min late -- PRM pickup (inbound). You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: chase the PRM team now -- the cabin cannot be turned round until they are off.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 5, "code": "96", "label": "flight schedule change (crew report time; arrived at different a/c)", "minutes": 54.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 54 min late -- flight schedule change (crew report time; arrived at different a/c). You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["Use the new crew report time from now on.", "Tell the office you are free -- someone else may cover the push.", "Tell the tug driver and headset now that the departure may be late.", "Tell the office you may be free soon -- you could be sent to another turn.", "Keep everything else moving that can still move.", "Get the new slot confirmed as soon as you know the delay."]}, {"n": 6, "code": "89", "label": "awaiting pushback", "minutes": 1.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 1 min late -- awaiting pushback. You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: check the tug and headset are ready so there is no extra wait.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 7, "code": "87", "label": "airport facilities (stand/gate)", "minutes": 9.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 9 min late -- airport facilities (stand/gate). You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 8, "code": "05", "label": "offload bags/pax", "minutes": 2.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 2 min late -- offload bags/pax. You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 9, "code": "02", "label": "air start unit (ASU) for departure", "minutes": 6.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 6 min late -- air start unit (ASU) for departure. You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 10, "code": "93", "label": "late inbound", "minutes": 4.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 4 min late -- late inbound. You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Work out the new realistic off-block time and use that from now on.", "Warn the next turn on this aircraft that it may be late.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 11, "code": "71", "label": "pax refused to board (rain)", "minutes": 12.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 12 min late -- pax refused to board (rain). You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: ask the crew to make an announcement and get the passenger on board.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 12, "code": "89", "label": "awaiting pushback", "minutes": 2.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 2 min late -- awaiting pushback. You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: check the tug and headset are ready so there is no extra wait.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 13, "code": "36", "label": "refuelling", "minutes": 1.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 1 min late -- fuelling. You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: push the fuellers to hurry, and board at the same time if the crew agree.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 14, "code": "81", "label": "slot", "minutes": 1.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 1 min late -- slot. You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Push right up to the slot limit. Keep the fuel and water going.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 15, "code": "16", "label": "passenger convenience (medical - nut allergy EpiPen)", "minutes": 4.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 4 min late -- passenger convenience (medical - nut allergy EpiPen). You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: help sort the medical problem and get the cabin ready so no more time is lost.", "Ask the gate and the cabin crew how serious it is before you do anything.", "If the medicine is in a hold bag, get the bag number and pull it before loading finishes.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 16, "code": "65", "label": "flight crew briefing", "minutes": 1.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 1 min late -- flight crew briefing. You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 17, "code": "02", "label": "air start unit (ASU)", "minutes": 8.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 8 min late -- air start unit (ASU). You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 18, "code": "85", "label": "share-code / travel-doc checks", "minutes": 4.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 4 min late -- share-code / travel-doc checks. You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: send another agent to the desk to get the document checks done.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 19, "code": "89", "label": "awaiting pushback", "minutes": 3.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 3 min late -- awaiting pushback. You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: check the tug and headset are ready so there is no extra wait.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 20, "code": "64", "label": "flight crew (late/changed captain)", "minutes": 7.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 7 min late -- flight crew (late/changed captain). You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 21, "code": "89", "label": "awaiting pushback", "minutes": 3.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 3 min late -- awaiting pushback. You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: check the tug and headset are ready so there is no extra wait.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 22, "code": "65", "label": "flight crew (captain late to instruct crew on boarding release)", "minutes": 1.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 1 min late -- flight crew (captain late to instruct crew on boarding release). You cannot pull this back, but there is still work to do.", "kind": "manage_around", "recoverable": false, "actions": ["It is only a short delay -- try to make the time up on the other jobs first.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 23, "code": "89", "label": "awaiting pushback", "minutes": 7.0, "turn": "daytime crew change", "aircraft": "A320", "prm": false, "safety": false, "headline": "Doors will be about 7 min late -- awaiting pushback. You can pull this back.", "kind": "recover", "recoverable": true, "actions": ["DO THIS FIRST: check the tug and headset are ready so there is no extra wait.", "Tell the tug driver and headset now that the departure may be late.", "Keep everything else moving that can still move."]}, {"n": 24, "code": "41", "label": "engineering on board", "minutes": 95.0, "turn": "first wave", "aircraft": "A321", "prm": true, "safety": true, "headline": "SAFETY FIRST -- engineering issue, technician on board. Sort this before anything else. The doors can wait.", "kind": "safety_hold", "recoverable": false, "actions": ["STOP -- resolve the safety issue before any recovery action.", "A delay is acceptable; compromising safety is not.", "Escalate to duty manager / engineering as required.", "(still live) Ask engineering how long the fix will really take, and tell the office early.", "(still live) Tell the tug driver and headset now that the departure may be late.", "(still live) Tell the office you may be free soon -- you could be sent to another turn.", "(still live) Keep everything else moving that can still move.", "(still live) Get the new slot confirmed as soon as you know the delay."]}, {"n": 25, "code": "41", "label": "engineering on board", "minutes": 40.0, "turn": "first wave", "aircraft": "A321", "prm": true, "safety": true, "headline": "SAFETY FIRST -- engineering issue during boarding. Sort this before anything else. The doors can wait.", "kind": "safety_hold", "recoverable": false, "actions": ["STOP -- resolve the safety issue before any recovery action.", "A delay is acceptable; compromising safety is not.", "Escalate to duty manager / engineering as required.", "(still live) Ask engineering how long the fix will really take, and tell the office early.", "(still live) Tell the tug driver and headset now that the departure may be late.", "(still live) Tell the office you may be free soon -- you could be sent to another turn.", "(still live) Keep everything else moving that can still move.", "(still live) Get the new slot confirmed as soon as you know the delay."]}, {"n": 26, "code": "41", "label": "engineering on board", "minutes": 25.0, "turn": "first wave", "aircraft": "A321", "prm": true, "safety": true, "headline": "SAFETY FIRST -- engineering fault found at pre-flight walkaround. Sort this before anything else. The doors can wait.", "kind": "safety_hold", "recoverable": false, "actions": ["STOP -- resolve the safety issue before any recovery action.", "A delay is acceptable; compromising safety is not.", "Escalate to duty manager / engineering as required.", "(still live) Ask engineering how long the fix will really take, and tell the office early.", "(still live) Tell the tug driver and headset now that the departure may be late.", "(still live) Tell the office you may be free soon -- you could be sent to another turn.", "(still live) Keep everything else moving that can still move.", "(still live) Get the new slot confirmed as soon as you know the delay."]}, {"n": 27, "code": "87", "label": "stand or airport facilities hazard", "minutes": 30.0, "turn": "first wave", "aircraft": "A321", "prm": true, "safety": true, "headline": "SAFETY FIRST -- stand or airport facilities hazard. Sort this before anything else. The doors can wait.", "kind": "safety_hold", "recoverable": false, "actions": ["STOP -- resolve the safety issue before any recovery action.", "A delay is acceptable; compromising safety is not.", "Escalate to duty manager / engineering as required.", "(still live) Tell the tug driver and headset now that the departure may be late.", "(still live) Tell the office you may be free soon -- you could be sent to another turn.", "(still live) Keep everything else moving that can still move.", "(still live) Get the new slot confirmed as soon as you know the delay."]}];
+const CONSENT = "This is for a university project. It is testing a prototype tool\nthat watches a turnaround and suggests what to do when it starts running late.\n\nYou will see 27 short situations. Each one shows what the tool would tell a\ncoordinator. Just say whether you would do it, and whether you agree with it.\nIt takes about 15 minutes.\n\nYou can stop whenever you like. Your name is not asked for and nothing here can\nbe traced back to you. Nothing is sent anywhere until you choose to send it.\n\nThere are no right answers. If you would do something different, say so -- that\nis the most useful thing you can tell us.";
+let step = -1;                       // -1 consent, 0..n-1 cases, n final, n+1 done
+const R = {};                        // responses
+const FINAL = {};
+
+const $ = () => document.getElementById("app");
+const esc = s => String(s).replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
+
+function render(){
+  if(step === -1) return consent();
+  if(step < CASES.length) return caseView(CASES[step]);
+  if(step === CASES.length) return finalView();
+  return doneView();
+}
+
+function consent(){
+  $().innerHTML = `<h1>Turnaround recommendations</h1>
+    <div class="sub">27 short situations — about 15 minutes</div>
+    <div class="card"><div class="card-b">
+      <div class="consent">${esc(CONSENT)}</div>
+      <button onclick="start()">I understand — begin</button>
+    </div></div>`;
+}
+function start(){ step = 0; render(); }
+
+function caseView(c){
+  const bm = c.kind==="safety_hold" ? ["b-safety","safety first"]
+           : c.kind==="recover" ? ["b-recover","can be pulled back"]
+           : ["b-manage","work around it"];
+  const r = R[c.n] || {};
+  const opt = (name,val,txt) => `<label class="opt ${r[name]===val?"sel":""}">
+     <input type="radio" name="${name}" ${r[name]===val?"checked":""}
+      onchange="set(${c.n},'${name}','${val}',this)">${txt}</label>`;
+  $().innerHTML = `
+    <div class="prog"><span>case ${c.n} of ${CASES.length}</span>
+      <span>code ${c.code}</span></div>
+    <div class="pbar"><div style="width:${(c.n/CASES.length)*100}%"></div></div>
+    <div class="card"><div class="card-b">
+      <div class="sit">
+        <span class="chip">${esc(c.turn)}</span><span class="chip">${c.aircraft}</span>
+        ${c.prm?'<span class="chip">PRM</span>':""}
+        ${c.safety?'<span class="chip sf">hazard</span>':""}
+      </div>
+      <div class="sit">Code ${c.code} — ${esc(c.label)} · ${c.minutes} min</div>
+      <span class="badge ${bm[0]}">${bm[1]}</span>
+      <h2>${esc(c.headline)}</h2>
+      <ul class="acts">${c.actions.map(a=>`<li>${esc(a)}</li>`).join("")}</ul>
+
+      <div class="q"><p>Would you do what it says?</p>
+        <div class="opts">
+          ${opt("action","as_written","Yes — just like that")}
+          ${opt("action","with_changes","Yes — but I would change something")}
+          ${opt("action","no","No — I would not do this")}
+        </div></div>
+
+      <div class="q"><p>It says this delay
+        <strong>${c.recoverable?"can be pulled back":"cannot be pulled back"}</strong>.
+        Is that right?</p>
+        <div class="opts">
+          ${opt("recov","agree","Yes, that's right")}
+          ${opt("recov","disagree","No, I disagree")}
+          ${opt("recov","unsure","Not sure")}
+        </div></div>
+
+      <div class="q"><p>What would you do differently? (optional)</p>
+        <textarea onchange="set(${c.n},'comment',this.value)">${esc(r.comment||"")}</textarea>
+      </div>
+
+      <div class="nav">
+        <button class="ghost" onclick="back()">Back</button>
+        <button onclick="next()">${step===CASES.length-1?"Last questions":"Next"}</button>
+      </div>
+    </div></div>`;
+}
+
+// Update the selection in place. A full re-render on every tap would throw the
+// reader back to the top of the page, which on a phone in a crew room is the
+// difference between finishing the survey and abandoning it.
+function set(n,k,v,el){
+  (R[n] = R[n]||{})[k]=v;
+  if(k==="comment" || !el) return;
+  document.querySelectorAll(`input[name="${k}"]`).forEach(i=>
+    i.closest(".opt").classList.toggle("sel", i===el));
+}
+function next(){ step++; window.scrollTo(0,0); render(); }
+function back(){ if(step>0){ step--; window.scrollTo(0,0); render(); } }
+
+function finalView(){
+  const sc = (name,q) => `<div class="q"><p>${q}</p><div class="opts">
+    ${[1,2,3,4,5].map(v=>`<label class="opt ${FINAL[name]==v?"sel":""}">
+      <input type="radio" name="${name}" ${FINAL[name]==v?"checked":""}
+       onchange="setF('${name}',${v},this)">${v} — ${["not at all","a little","somewhat","quite","very"][v-1]}
+    </label>`).join("")}</div></div>`;
+  $().innerHTML = `<h1>Last few questions</h1>
+    <div class="card"><div class="card-b">
+      ${sc("useful","Would this be useful to you on shift?")}
+      ${sc("trust","Would you trust it to spot the right cause?")}
+      ${sc("clear","Was it clear what it wanted you to do?")}
+      <div class="q"><p>How long have you worked in ground operations?</p>
+        <div class="opts">
+          ${["under 1 year","1–3 years","3–10 years","over 10 years"].map(v=>
+            `<label class="opt ${FINAL.exp===v?"sel":""}">
+             <input type="radio" name="exp" ${FINAL.exp===v?"checked":""}
+              onchange="setF('exp','${v}',this)">${v}</label>`).join("")}
+        </div></div>
+      <div class="q"><p>Anything else? (optional)</p>
+        <textarea onchange="setF('notes',this.value)">${esc(FINAL.notes||"")}</textarea></div>
+      <div class="nav"><button class="ghost" onclick="back()">Back</button>
+        <button onclick="finish()">Finish and export</button></div>
+    </div></div>`;
+}
+function setF(k,v,el){
+  FINAL[k]=v;
+  if(k==="notes" || !el) return;
+  document.querySelectorAll(`input[name="${k}"]`).forEach(i=>
+    i.closest(".opt").classList.toggle("sel", i===el));
+}
+
+function finish(){ step = CASES.length+1; render(); download(); }
+
+function csv(){
+  const rows=[["case","code","label","minutes","kind","recoverable",
+               "would_action","recoverability_view","comment"]];
+  CASES.forEach(c=>{ const r=R[c.n]||{};
+    rows.push([c.n,c.code,c.label,c.minutes,c.kind,c.recoverable,
+      r.action||"",r.recov||"",(r.comment||"").replace(/[\n\r"]/g," ")]); });
+  rows.push([]); rows.push(["overall_useful",FINAL.useful||""]);
+  rows.push(["overall_trust",FINAL.trust||""]);
+  rows.push(["overall_clear",FINAL.clear||""]);
+  rows.push(["experience",FINAL.exp||""]);
+  rows.push(["notes",(FINAL.notes||"").replace(/[\n\r"]/g," ")]);
+  return rows.map(r=>r.map(v=>`"${String(v)}"`).join(",")).join("\n");
+}
+function download(){
+  const blob=new Blob([csv()],{type:"text/csv"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`appraisal_${Date.now()}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function doneView(){
+  const n=Object.keys(R).length;
+  $().innerHTML=`<div class="card"><div class="card-b done">
+    <div class="big">Thank you</div>
+    <p style="color:var(--dim)">${n} of ${CASES.length} cases rated.
+    Please return your answers using any one of the options below.</p>
+    <button onclick="copyOut()">Copy answers to clipboard</button>
+    <button class="ghost" onclick="mailOut()">Send by email</button>
+    <button class="ghost" onclick="download()">Download as a file</button>
+    <p id="msg" style="color:var(--green);font-family:var(--mono);font-size:12px"></p>
+  </div></div>`;
+}
+function copyOut(){
+  const t=csv();
+  const done=()=>{ document.getElementById("msg").textContent =
+    "Copied. Paste it into a message and send it back."; };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done, fallbackCopy);
+  } else fallbackCopy();
+  function fallbackCopy(){
+    const a=document.createElement("textarea");
+    a.value=t; document.body.appendChild(a); a.select();
+    try{ document.execCommand("copy"); done(); }
+    catch(e){ document.getElementById("msg").textContent=
+      "Could not copy automatically — please use the download option."; }
+    a.remove();
+  }
+}
+function mailOut(){
+  // Kept short: some mail clients truncate long links, so only the answers
+  // travel, not the case text the respondent already saw.
+  const body=encodeURIComponent(csv());
+  window.location.href=`mailto:?subject=${encodeURIComponent(
+    "Turnaround appraisal responses")}&body=${body}`;
+}
+render();
+</script></body></html>
