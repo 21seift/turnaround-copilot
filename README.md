@@ -43,8 +43,12 @@ Per-code advantage, which matters more than the headline:
 |---|---|---|---|
 | 64 flight crew late | before boarding | 3 | **+18.0** |
 | 71 passenger refused boarding | at boarding | 17 | +8.0 |
+| 16 passenger medical | at boarding | 2 | +8.0 |
+| 85 document / travel-permission checks | during boarding | 1 | +6.0 |
 | 04 inbound PRM pickup | at last passenger off | 5 | +4.0 |
+| 96 flight schedule change | unknown | 19 | +2.0 |
 | 87 / 34 stand and ground equipment | at arrival | 33 | +2.0 |
+| 81 slot | unknown | 5 | +2.0 |
 | **93 late inbound** | **at in-block** | **1** | **+0.0** |
 
 Code 93 ties at zero, correctly and deliberately. A late inbound is knowable and
@@ -101,7 +105,7 @@ turnaround_sim/
   demo.py               command-line demonstration entry point
 tests/
   test_rebasing.py      countdown regression against real records
-  test_hierarchy.py     constraint-layer invariants (11 tests)
+  test_hierarchy.py     constraint-layer invariants (11 of 13 tests)
 ```
 
 ## Running
@@ -114,10 +118,9 @@ python -m turnaround_sim.demo                  # one turn, agent working
 python -m turnaround_sim.demo --safety         # hierarchy under a live hazard
 python -m turnaround_sim.demo --compare        # all three approaches, same turn
 
-pytest tests/                                  # full regression suite
-python -m turnaround_sim.evaluate_emerging     # headline result
-python -m turnaround_sim.evaluate              # attribution / triage / action
-python -m turnaround_sim.compare_reasoners     # offline mock backend
+pytest tests/                                  # full regression suite (13 tests)
+python -m turnaround_sim.evaluate_emerging     # detection lead
+python -m turnaround_sim.evaluate_outcomes     # recovered delay
 ```
 
 Runtime dependency: SimPy, with pytest for the test suite.
