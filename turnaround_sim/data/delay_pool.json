@@ -1,0 +1,144 @@
+{
+  "_note": "De-identified pool of observed delay occurrences: IATA code, duration and reveal point only. No operator, airport, date, flight, stand, sheet identifier or verbatim label.",
+  "n_occurrences": 23,
+  "occurrences": [
+    {
+      "code": "93",
+      "minutes": 3.0,
+      "mechanic": null,
+      "revealed": "at_in_block"
+    },
+    {
+      "code": "34",
+      "minutes": 15.0,
+      "mechanic": null,
+      "revealed": "at_arrival"
+    },
+    {
+      "code": "81",
+      "minutes": 16.0,
+      "mechanic": "hold",
+      "revealed": "unknown"
+    },
+    {
+      "code": "04",
+      "minutes": 5.0,
+      "mechanic": null,
+      "revealed": "at_last_pax_off"
+    },
+    {
+      "code": "96",
+      "minutes": 54.0,
+      "mechanic": null,
+      "revealed": "unknown"
+    },
+    {
+      "code": "89",
+      "minutes": 1.0,
+      "mechanic": "hold",
+      "revealed": "at_end"
+    },
+    {
+      "code": "87",
+      "minutes": 9.0,
+      "mechanic": null,
+      "revealed": "at_arrival"
+    },
+    {
+      "code": "05",
+      "minutes": 2.0,
+      "mechanic": null,
+      "revealed": "unknown"
+    },
+    {
+      "code": "02",
+      "minutes": 6.0,
+      "mechanic": null,
+      "revealed": "at_departure"
+    },
+    {
+      "code": "93",
+      "minutes": 4.0,
+      "mechanic": null,
+      "revealed": "at_in_block"
+    },
+    {
+      "code": "71",
+      "minutes": 12.0,
+      "mechanic": "stretch",
+      "revealed": "at_boarding_late"
+    },
+    {
+      "code": "89",
+      "minutes": 2.0,
+      "mechanic": "hold",
+      "revealed": "at_end"
+    },
+    {
+      "code": "36",
+      "minutes": 1.0,
+      "mechanic": "spike",
+      "revealed": "at_fuel_start_late"
+    },
+    {
+      "code": "81",
+      "minutes": 1.0,
+      "mechanic": "hold",
+      "revealed": "unknown"
+    },
+    {
+      "code": "16",
+      "minutes": 4.0,
+      "mechanic": "stretch",
+      "revealed": "at_boarding_late"
+    },
+    {
+      "code": "65",
+      "minutes": 1.0,
+      "mechanic": null,
+      "revealed": "before_green_light"
+    },
+    {
+      "code": "02",
+      "minutes": 8.0,
+      "mechanic": null,
+      "revealed": "after_closure"
+    },
+    {
+      "code": "85",
+      "minutes": 4.0,
+      "mechanic": null,
+      "revealed": "during_boarding"
+    },
+    {
+      "code": "89",
+      "minutes": 3.0,
+      "mechanic": "hold",
+      "revealed": "at_end"
+    },
+    {
+      "code": "64",
+      "minutes": 7.0,
+      "mechanic": null,
+      "revealed": "before_boarding"
+    },
+    {
+      "code": "89",
+      "minutes": 3.0,
+      "mechanic": "hold",
+      "revealed": "at_end"
+    },
+    {
+      "code": "65",
+      "minutes": 1.0,
+      "mechanic": null,
+      "revealed": "before_green_light"
+    },
+    {
+      "code": "89",
+      "minutes": 7.0,
+      "mechanic": "hold",
+      "revealed": "at_end"
+    }
+  ]
+}

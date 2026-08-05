@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# CONFIDENTIAL -- never commit.
+# Source dispatch records and elicited shift documentation identify the
+# handling agent, the carrier and the airport. Held locally as calibration
+# material only. De-identified derivatives (code_reveal.json, delay_pool.json)
+# are committed in their place and reproduce all published results.
+# ---------------------------------------------------------------------------
+turnaround_sim/data/real_sheets.json
+turnaround_sim/data/shift_operations.json
+*.sheet.json
+sheets/
+photos/
+
+# Secrets
+.env
+*.key
+ANTHROPIC_API_KEY*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Scratch
+*.bak
+*.orig
+.DS_Store
+turnaround_sim/data/llm_cache/

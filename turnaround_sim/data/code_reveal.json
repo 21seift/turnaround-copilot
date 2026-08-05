@@ -1,0 +1,20 @@
+{
+  "_note": "Derived reveal-point classification per IATA delay code. Contains no operator, airport, date, sheet identifier or delay magnitude -- classification only.",
+  "code_reveal": {
+    "02": "at_departure",
+    "04": "at_last_pax_off",
+    "05": "unknown",
+    "16": "at_boarding_late",
+    "34": "at_arrival",
+    "36": "at_fuel_start_late",
+    "64": "before_boarding",
+    "65": "before_green_light",
+    "71": "at_boarding_late",
+    "81": "unknown",
+    "85": "during_boarding",
+    "87": "at_arrival",
+    "89": "at_end",
+    "93": "at_in_block",
+    "96": "unknown"
+  }
+}

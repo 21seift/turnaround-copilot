@@ -1,0 +1,17 @@
+{
+  "recoverable_late_fuel": {
+    "source_sheet": "IMG_2240 (first-wave late fuel start)",
+    "recoverable": true,
+    "agent_lead": -16,
+    "timing_proof": -4,
+    "edge_min": 12,
+    "headline": "Recoverable breach forming - chase the fuel, protect the -8"
+  },
+  "unrecoverable_schedule_change": {
+    "source_sheet": "IMG_2236 (code 96, 54 min schedule change)",
+    "recoverable": false,
+    "agent_lead": -20,
+    "timing_proof": null,
+    "headline": "Unrecoverable - rebase and protect what follows"
+  }
+}

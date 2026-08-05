@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turnaround Copilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1015; --panel:#141C24; --panel2:#1B2732; --line:#2A3A47;
+  --text:#DCE6ED; --dim:#7E93A3;
+  --cyan:#55C7DE; --green:#35D08A; --amber:#FFB020; --red:#FF4D4F;
+  --sans:"Barlow Condensed",Arial Narrow,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+     font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1280px;margin:0 auto;padding:18px 16px 60px}
+h1{font-size:26px;font-weight:700;margin:0;letter-spacing:.01em}
+.sub{font-family:var(--mono);font-size:11px;color:var(--dim);
+     letter-spacing:.14em;text-transform:uppercase}
+.head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;
+      border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);margin-bottom:14px}
+.card-h{font-family:var(--mono);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim);padding:10px 14px;
+  border-bottom:1px solid var(--line);display:flex;justify-content:space-between}
+.card-b{padding:14px}
+
+/* intake */
+label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--dim);margin:0 0 4px}
+select,input[type=time]{width:100%;background:var(--panel2);border:1px solid var(--line);
+  color:var(--text);font-family:var(--mono);font-size:14px;padding:7px 8px}
+input[type=time]:focus,select:focus{outline:2px solid var(--cyan);outline-offset:-1px}
+.f{margin-bottom:11px}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.chk{display:flex;align-items:center;gap:8px;font-size:15px;margin:7px 0}
+.chk input{accent-color:var(--cyan);width:15px;height:15px}
+.ts-group{border-top:1px solid var(--line);margin-top:12px;padding-top:11px}
+.ts-title{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cyan);margin-bottom:9px}
+button{width:100%;background:var(--cyan);color:#04161C;border:none;
+  font-family:var(--mono);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;font-weight:600;padding:12px;cursor:pointer;margin-top:6px}
+button:hover{filter:brightness(1.08)}
+button:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.ghost{background:transparent;color:var(--dim);border:1px solid var(--line);margin-top:8px}
+
+/* rebasing strip */
+.chain{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+       font-family:var(--mono);font-size:13px}
+.chain b{font-size:19px;font-weight:600;display:block;color:var(--text)}
+.chain .st{color:var(--dim);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.chain .ar{color:var(--line);font-size:19px}
+.tgt b{color:var(--cyan)}
+
+/* milestone table */
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px}
+th{text-align:left;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+   color:var(--dim);font-weight:400;padding:0 8px 7px;border-bottom:1px solid var(--line)}
+td{padding:6px 8px;border-bottom:1px solid rgba(42,58,71,.5)}
+td.n{font-family:var(--sans);font-size:15px}
+.v-ok{color:var(--green)} .v-warn{color:var(--amber)} .v-bad{color:var(--red)}
+.v-none{color:var(--line)}
+.kpi{color:var(--cyan);font-size:9px;letter-spacing:.1em}
+tr.miss td{opacity:.35}
+
+/* attribution */
+.dom{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.dom .code{font-family:var(--mono);font-size:30px;font-weight:600;color:var(--amber);
+  border:2px solid var(--amber);padding:5px 11px;line-height:1}
+.dom .lab{font-size:20px;font-weight:600}
+.dom .src{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.contrib{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:13px}
+.contrib li{display:flex;justify-content:space-between;padding:5px 0;
+  border-top:1px solid rgba(42,58,71,.5)}
+
+/* breakdown bars */
+.bar{display:flex;height:26px;border:1px solid var(--line);margin:10px 0 6px}
+.bar div{display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;color:#05131A;font-weight:600}
+.b-in{background:var(--dim)} .b-before{background:var(--amber)}
+.b-after{background:var(--cyan)}
+.legend{display:flex;gap:16px;font-family:var(--mono);font-size:11px;color:var(--dim);
+  flex-wrap:wrap}
+.legend i{display:inline-block;width:9px;height:9px;margin-right:5px}
+
+/* prediction */
+.pred{display:flex;gap:26px;align-items:baseline;flex-wrap:wrap}
+.pred .big{font-family:var(--mono);font-size:34px;font-weight:600;line-height:1}
+.breach{color:var(--red)} .ontime{color:var(--green)}
+
+/* recommendation */
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;padding:4px 9px;margin-bottom:10px}
+.b-safety{background:var(--red);color:#160406;font-weight:600}
+.b-recover{background:var(--green);color:#04160E;font-weight:600}
+.b-manage{background:var(--amber);color:#1A1000;font-weight:600}
+.b-monitor{border:1px solid var(--line);color:var(--dim)}
+.headline{font-size:21px;font-weight:600;margin:0 0 12px;line-height:1.25}
+.acts{list-style:none;margin:0;padding:0}
+.acts li{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);
+  font-size:16px;align-items:flex-start}
+.acts li:first-child{border-top:none}
+.acts input{margin-top:4px;accent-color:var(--cyan);width:15px;height:15px;flex:none}
+.acts .done{color:var(--dim);text-decoration:line-through}
+.beneath{color:var(--dim);font-style:italic}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+summary{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim);cursor:pointer}
+.reasons{margin:10px 0 0;padding-left:16px;color:var(--dim);font-size:14px}
+.empty{color:var(--dim);padding:26px 0;text-align:center;font-size:16px}
+.err{color:var(--red);font-family:var(--mono);font-size:13px}
+
+/* transport */
+.transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--panel2);border:1px solid var(--line);padding:10px 12px;
+  margin-bottom:14px;position:sticky;top:0;z-index:5}
+.transport button{width:auto;padding:8px 14px;margin:0}
+.transport .ghost{margin:0}
+.clock{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;min-width:96px}
+.cdown{font-family:var(--mono);font-size:13px;color:var(--dim);min-width:70px}
+.spd{display:flex;gap:0}
+.spd button{border:1px solid var(--line);background:transparent;color:var(--dim);
+  font-size:11px;padding:7px 10px}
+.spd button[aria-pressed=true]{background:var(--cyan);color:#04161C;border-color:var(--cyan)}
+#tl{flex:1;min-width:150px;accent-color:var(--cyan)}
+
+/* countdown ribbon */
+.rib{background:var(--panel);border:1px solid var(--line);padding:20px 18px 12px;
+  margin-bottom:14px}
+.rtrack{position:relative;height:62px}
+.rax{position:absolute;left:0;right:0;top:34px;height:2px;background:var(--line)}
+.rfill{position:absolute;top:34px;left:0;height:2px;background:var(--cyan);opacity:.45}
+.rspan{position:absolute;top:30px;height:10px;background:rgba(53,208,138,.14);
+  border-left:1px solid var(--green);border-right:1px solid var(--amber)}
+.rm{position:absolute;top:8px;transform:translateX(-50%);text-align:center}
+.rm .d{width:10px;height:10px;border-radius:50%;margin:0 auto 4px;border:2px solid var(--bg)}
+.rm .l{font-family:var(--mono);font-size:9px;letter-spacing:.1em;
+  text-transform:uppercase;white-space:nowrap}
+.rm.rep .d{background:var(--cyan)}  .rm.rep .l{color:var(--cyan)}
+.rm.ag .d{background:var(--green)}  .rm.ag .l{color:var(--green)}
+.rm.cp .d{background:var(--amber)}  .rm.cp .l{color:var(--amber)}
+.rm.dr .d{background:var(--red)}    .rm.dr .l{color:var(--red)}
+.rnow{position:absolute;top:4px;bottom:16px;width:2px;background:var(--text)}
+.rnow::after{content:"";position:absolute;top:-1px;left:-5px;width:12px;height:11px;
+  background:var(--text);clip-path:polygon(50% 100%,0 0,100% 0)}
+.rgap{position:absolute;top:-2px;transform:translateX(-50%);font-family:var(--mono);
+  font-size:10px;color:var(--green);white-space:nowrap}
+
+/* lead banner */
+.lead-b{border:1px solid var(--green);background:rgba(53,208,138,.08);
+  padding:10px 14px;margin-bottom:14px;font-family:var(--mono);font-size:13px;
+  color:var(--green);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lead-b.quiet{border-color:var(--line);background:transparent;color:var(--dim)}
+
+/* who has called it */
+.calls{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line)}
+.call{background:var(--panel);padding:11px 13px}
+.call .who{font-family:var(--mono);font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:7px}
+.call .lamp{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.call.on .lamp{background:var(--amber);box-shadow:0 0 7px rgba(255,176,32,.6)}
+.call.agent.on .lamp{background:var(--green);box-shadow:0 0 7px rgba(53,208,138,.6)}
+.call.dash.on .lamp{background:var(--red);box-shadow:0 0 7px rgba(255,77,79,.6)}
+.call .st2{font-size:15px;margin-top:5px}
+.call .when{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* event feed */
+.feed{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:12px;
+  max-height:210px;overflow:auto}
+.feed li{display:flex;justify-content:space-between;gap:10px;padding:5px 0;
+  border-top:1px solid rgba(42,58,71,.5)}
+.feed li.pending{opacity:.32}
+.feed li.now{background:rgba(85,199,222,.10)}
+.feed .rep{color:var(--amber)}
+.foot{margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--dim);
+  letter-spacing:.05em;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <h1>Turnaround Copilot</h1>
+    <span class="sub">decision support — the coordinator decides</span>
+  </div>
+
+  <div class="grid">
+
+    <!-- ================= INTAKE ================= -->
+    <div>
+      <div class="card">
+        <div class="card-h"><span>the turn</span></div>
+        <div class="card-b">
+          <div class="f2">
+            <div class="f"><label for="turn">turn type</label>
+              <select id="turn">
+                <option value="DAYTIME_CREW_CHANGE">Daytime, crew change</option>
+                <option value="DAYTIME_NO_CREW_CHANGE">Daytime, no crew change</option>
+                <option value="FIRST_WAVE">First wave / nightstop</option>
+              </select></div>
+            <div class="f"><label for="ac">aircraft</label>
+              <select id="ac"><option>A319</option><option selected>A320</option>
+                <option>A321</option></select></div>
+          </div>
+          <div class="f2">
+            <div class="f"><label for="sched">scheduled departure</label>
+              <input type="time" id="sched" value="09:00"></div>
+            <div class="f"><label for="inblock">actual in-block</label>
+              <input type="time" id="inblock" value="08:12"></div>
+          </div>
+          <div class="chk"><input type="checkbox" id="prm"><label for="prm"
+            style="margin:0;text-transform:none;font-size:15px;font-family:var(--sans);
+            letter-spacing:0;color:var(--text)">PRMs booked</label></div>
+          <div class="chk"><input type="checkbox" id="ema"><label for="ema"
+            style="margin:0;text-transform:none;font-size:15px;font-family:var(--sans);
+            letter-spacing:0;color:var(--text)">EMA handover expected</label></div>
+          <div class="chk"><input type="checkbox" id="safety"><label for="safety"
+            style="margin:0;text-transform:none;font-size:15px;font-family:var(--sans);
+            letter-spacing:0;color:var(--red)">Live safety hazard reported</label></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span>reported issue — what you were told</span></div>
+        <div class="card-b">
+          <div class="f2">
+            <div class="f"><label for="rcode">issue reported</label>
+              <select id="rcode">
+                <option value="">none</option>
+                <option value="36">36 — refuelling</option>
+                <option value="93">93 — late inbound</option>
+                <option value="41">41 — engineering on board</option>
+                <option value="67">67 — late crew</option>
+                <option value="81">81 — slot</option>
+                <option value="87">87 — stand / facilities</option>
+              </select></div>
+            <div class="f"><label for="rat">time reported</label>
+              <input type="time" id="rat"></div>
+          </div>
+          <div style="font-size:14px;color:var(--dim)">A cause is usually known
+          before it shows up in a timestamp. This is the only thing the agent
+          gets that the projector does not.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><span>timestamps as recorded</span></div>
+        <div class="card-b">
+          <div class="ts-group" style="border:none;margin:0;padding:0">
+            <div class="ts-title">inbound</div>
+            <div id="ts-in"></div>
+          </div>
+          <div class="ts-group">
+            <div class="ts-title">outbound</div>
+            <div id="ts-out"></div>
+          </div>
+          <button id="go">Run the turn</button>
+          <button class="ghost" id="demo">Example — turn in progress</button>
+          <button class="ghost" id="demo2">Example — safety hold</button>
+          <button class="ghost" id="demo3">Example — no advantage</button>
+          <button class="ghost" id="clear">Clear timestamps</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= RESULTS ================= -->
+    <div>
+      <div class="transport" id="transport" hidden>
+        <button class="ghost" id="play">▶ Play</button>
+        <div><div class="clock" id="clock">--:--</div></div>
+        <div class="cdown" id="cdown"></div>
+        <input type="range" id="tl" min="0" max="1" value="0" aria-label="Turn clock">
+        <div class="spd">
+          <button id="s1" aria-pressed="true">1×</button>
+          <button id="s4" aria-pressed="false">4×</button>
+          <button id="s16" aria-pressed="false">16×</button>
+        </div>
+        <button class="ghost" id="reset">Reset</button>
+      </div>
+      <div id="out">
+      <div class="card"><div class="card-b">
+        <div class="empty">Enter the timestamps you have and assess the turn.<br>
+        Partial records are fine — the agent works with what is known so far.</div>
+      </div></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="foot">recommendations are advisory — the coordinator decides; the agent never acts</div>
+</div>
+
+<script>
+const IN_FIELDS = [
+  ["in_block","Aircraft in-block"],
+  ["door1_open","Door 1 open"],
+  ["last_pax_off","Last passenger off"],
+];
+const OUT_FIELDS = [
+  ["fuelling_start","Fuelling start"],
+  ["fuelling_end","Fuelling complete"],
+  ["green_light","Green light (boarding)"],
+  ["last_prm_on","Last PRM boarded"],
+  ["last_pax_on","Last passenger boarded"],
+  ["gate_close","Gate closed"],
+  ["loadsheet_from_captain","Loadsheet returned"],
+  ["door_closure","Doors closed"],
+  ["off_block","Off-block"],
+];
+const $ = i => document.getElementById(i);
+const hm = m => `${String(Math.floor(m/60)%24).padStart(2,"0")}:${String(Math.round(m)%60).padStart(2,"0")}`;
+const toMin = v => { if(!v) return null; const [h,m]=v.split(":").map(Number); return h*60+m; };
+
+function fields(host, list){
+  $(host).innerHTML = list.map(([k,l])=>
+    `<div class="f"><label for="ts_${k}">${l}</label>
+     <input type="time" id="ts_${k}" data-k="${k}"></div>`).join("");
+}
+fields("ts-in", IN_FIELDS); fields("ts-out", OUT_FIELDS);
+
+function collect(){
+  const actuals={};
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const v=toMin(el.value); if(v!==null) actuals[el.dataset.k]=v;
+  });
+  return {
+    turn:$("turn").value, aircraft:$("ac").value,
+    scheduled_departure:toMin($("sched").value),
+    actual_in_block:toMin($("inblock").value),
+    has_prm:$("prm").checked, has_ema:$("ema").checked,
+    safety_flag:$("safety").checked,
+    reported_code:$("rcode").value, reported_at:toMin($("rat").value),
+    actuals
+  };
+}
+function vclass(v){ if(v===null) return "v-none";
+  return v>4?"v-bad":v>0.5?"v-warn":"v-ok"; }
+
+/* ---------------- playback state ---------------- */
+let TL=null, idx=0, timer=null, speed=1, ticked=new Set(),
+    trueAgent=null, trueCpm=null, trueDash=null,
+    firstAgent=null, firstCpm=null, firstDash=null, labels={};
+
+// When each approach first speaks is a property of the timeline, not of how
+// the user happened to scrub through it. It is derived once from the data;
+// display then reveals each marker only once the clock has reached it, so
+// nothing on screen is clairvoyant.
+function firstCalls(frames){
+  let a=null,c=null,d=null;
+  for(const f of frames){
+    const r=f.assessment.recommendation;
+    if(a===null && r.kind && r.kind!=="monitor") a=f.t;
+    if(c===null && f.assessment.projection.will_breach) c=f.t;
+    if(d===null && f.dashboard) d=f.t;
+  }
+  return [a,c,d];
+}
+
+function stop(){ if(timer){clearInterval(timer);timer=null;} $("play").textContent="▶ Play"; }
+function play(){
+  if(!TL) return;
+  if(timer){ stop(); return; }
+  if(idx>=TL.frames.length-1) idx=0;
+  $("play").textContent="❚❚ Pause";
+  timer=setInterval(()=>{
+    if(idx>=TL.frames.length-1){ stop(); return; }
+    idx++; show();
+  }, 1000/speed);
+}
+function setSpeed(v,btn){
+  speed=v; ["s1","s4","s16"].forEach(i=>$(i).setAttribute("aria-pressed", i===btn));
+  if(timer){ stop(); play(); }
+}
+
+/* ---------------- render one frame ---------------- */
+function show(){
+  const f=TL.frames[idx], d=f.assessment, s=d.schedule,
+        p=d.projection, r=d.recommendation, at=d.attribution, dc=d.decomposition;
+  $("tl").value=idx;
+  $("clock").textContent=hm(f.t);
+  const togo=Math.round(s.door_target-f.t);
+  $("cdown").textContent = togo>0?`T−${togo} to doors`:`${Math.abs(togo)} past doors`;
+
+  // reveal each first-call only once the clock has reached it
+  const spoke = r.kind && r.kind!=="monitor";
+  firstAgent = (trueAgent!==null && trueAgent<=f.t) ? trueAgent : null;
+  firstCpm   = (trueCpm  !==null && trueCpm  <=f.t) ? trueCpm   : null;
+  firstDash  = (trueDash !==null && trueDash <=f.t) ? trueDash  : null;
+
+  // ---- lead banner
+  let lead;
+  if(firstAgent!==null && firstCpm===null){
+    lead=`<div class="lead-b"><span>▲ the agent has committed to a course of
+      action — the projector still sees nothing</span>
+      <span>${f.t-firstAgent} min ago</span></div>`;
+  } else if(firstAgent!==null && firstCpm!==null){
+    const g=firstCpm-firstAgent;
+    lead=`<div class="lead-b ${g>0?"":"quiet"}">
+      <span>${g>0?`▲ the agent called this ${g} min before the projector`
+                 :"— both approaches called it at the same minute"}</span>
+      <span>${firstDash!==null?`dashboard: ${firstDash-firstAgent} min later`:"dashboard: still silent"}</span></div>`;
+  } else {
+    lead=`<div class="lead-b quiet"><span>— nothing called yet</span>
+      <span>watching the event stream</span></div>`;
+  }
+
+  // ---- who has called it
+  const call=(cls,who,on,txt,when)=>`<div class="call ${cls} ${on?"on":""}">
+      <div class="who"><span class="lamp"></span>${who}</div>
+      <div class="st2">${txt}</div>
+      <div class="when">${when||""}</div></div>`;
+  const calls=`<div class="card"><div class="card-h"><span>who has called it</span>
+      <span>same event stream, three responses</span></div>
+    <div class="calls">
+      ${call("dash","threshold dashboard",f.dashboard,
+        f.dashboard?"Door target passed":"Silent",
+        firstDash!==null?`first flagged ${hm(firstDash)}`:"")}
+      ${call("","critical-path projector",p.will_breach,
+        p.will_breach?`Breach +${p.over} min, no cause`:"Monitoring",
+        firstCpm!==null?`first flagged ${hm(firstCpm)}`:"")}
+      ${call("agent","agent",spoke,
+        spoke?r.headline:"Monitoring",
+        firstAgent!==null?`first flagged ${hm(firstAgent)}`:"")}
+    </div></div>`;
+
+  // ---- event feed
+  const feed=TL.order.map(k=>{
+    const landed=f.landed.includes(k), tm=TL.actuals[k];
+    const cur = landed && tm===f.t;
+    const row=d.milestones.find(m=>m.key===k);
+    const v=row&&row.variance!==null?((row.variance>0?"+":"")+row.variance.toFixed(1)):"";
+    return `<li class="${landed?"":"pending"} ${cur?"now":""}">
+      <span>${hm(tm)} &nbsp; ${labels[k]||k}</span>
+      <span class="${row?vclass(row.variance):""}">${landed?v:"pending"}</span></li>`;
+  }).join("");
+  const rep = TL.payload.reported_code && TL.payload.reported_at!==null
+    && f.t>=TL.payload.reported_at
+    ? `<li class="now"><span class="rep">${hm(TL.payload.reported_at)} &nbsp;
+       issue reported — code ${TL.payload.reported_code}</span>
+       <span class="rep">known</span></li>` : "";
+  const feedCard=`<div class="card"><div class="card-h">
+      <span>event stream</span><span>${f.landed.length} of ${TL.order.length} landed</span></div>
+    <div class="card-b"><ul class="feed">${rep}${feed}</ul></div></div>`;
+
+  // ---- countdown ribbon: the lead made visible, not just stated
+  const t0=TL.frames[0].t, tEnd=TL.frames[TL.frames.length-1].t, span=tEnd-t0;
+  const X=v=>((v-t0)/span)*100;
+  const mk=(cls,v,lab)=> v===null||v===undefined ? "" :
+    `<div class="rm ${cls}" style="left:${X(v)}%"><div class="d"></div>
+     <div class="l">${lab}</div></div>`;
+  const repAt = TL.payload.reported_code ? TL.payload.reported_at : null;
+  let gap="";
+  if(firstAgent!==null && firstCpm!==null && firstCpm>firstAgent){
+    gap=`<div class="rspan" style="left:${X(firstAgent)}%;
+           width:${X(firstCpm)-X(firstAgent)}%"></div>
+         <div class="rgap" style="left:${(X(firstAgent)+X(firstCpm))/2}%">
+           ${firstCpm-firstAgent} min of lead</div>`;
+  }
+  const ribbon=`<div class="rib"><div class="rtrack">
+      <div class="rax"></div>
+      <div class="rfill" style="width:${X(f.t)}%"></div>
+      ${gap}
+      ${mk("rep",repAt,"reported")}
+      ${mk("ag",firstAgent,"agent acts")}
+      ${mk("cp",firstCpm,"projector")}
+      ${mk("dr",s.door_target,"doors")}
+      <div class="rnow" style="left:${X(f.t)}%"></div>
+    </div></div>`;
+
+  // ---- milestone variance table: how the cause was identified
+  const mrows=d.milestones.filter(m=>m.expected&&(m.actual!==null||m.target!==null))
+    .map(m=>{
+      const landed=m.actual!==null;
+      return `<tr class="${landed?"":"miss"}">
+        <td class="n">${m.name} ${m.is_kpi?'<span class="kpi">KPI</span>':""}</td>
+        <td>${hm(m.target)}</td>
+        <td>${landed?hm(m.actual):"—"}</td>
+        <td class="${vclass(m.variance)}">${m.variance===null?"—":
+          (m.variance>0?"+":"")+m.variance.toFixed(1)}</td>
+        <td>${m.late&&m.code?("code "+m.code):""}</td></tr>`;
+    }).join("");
+  const table=`<div class="card"><div class="card-h">
+      <span>milestones — target against what happened</span>
+      <span>variance in minutes</span></div>
+    <div class="card-b"><table><thead><tr>
+      <th>milestone</th><th>target</th><th>actual</th><th>variance</th><th>implies</th>
+    </tr></thead><tbody>${mrows}</tbody></table></div></div>`;
+
+  // ---- rebasing chain
+  const chain=`<div class="card"><div class="card-h">
+      <span>rebasing — everything counts back from the anchor</span>
+      <span>spin ${s.spin} min · prep ${s.prep} min</span></div>
+    <div class="card-b"><div class="chain">
+      <div><span class="st">in-block (anchor)</span><b>${hm(s.actual_in_block)}</b></div>
+      <span class="ar">→</span>
+      <div><span class="st">estimated departure</span><b>${hm(s.estimated_departure)}</b></div>
+      <span class="ar">→</span>
+      <div class="tgt"><span class="st">door target (${s.door_offset})</span>
+        <b>${hm(s.door_target)}</b></div>
+      <span class="ar">·</span>
+      <div><span class="st">late inbound</span><b>${s.late_inbound} min</b></div>
+    </div></div></div>`;
+
+  // ---- attribution
+  let attr="";
+  if(at.dominant){
+    attr=`<div class="card"><div class="card-h"><span>attribution — what is going wrong</span></div>
+      <div class="card-b"><div class="dom"><div class="code">${at.dominant.code}</div>
+        <div><div class="lab">${at.dominant.label}</div>
+        <div class="src">${at.dominant.minutes} min exposure · ${at.dominant.milestone}</div>
+      </div></div>
+      ${at.contributors.length>1?`<ul class="contrib">${at.contributors.map(c=>
+        `<li><span>code ${c.code} — ${c.label}</span><span>+${c.minutes} min</span></li>`
+      ).join("")}</ul>`:""}</div></div>`;
+  }
+
+  // ---- prediction
+  const pred=`<div class="card"><div class="card-h">
+      <span>prediction — critical path called as a tool</span>
+      <span>${p.lead} min of lead remaining</span></div>
+    <div class="card-b"><div class="pred">
+      <div><span class="sub">projected doors</span>
+        <div class="big ${p.will_breach?"breach":"ontime"}">${hm(p.projected_door_closure)}</div></div>
+      <div><span class="sub">target</span><div class="big">${hm(p.door_target)}</div></div>
+      <div><span class="sub">over</span>
+        <div class="big ${p.will_breach?"breach":"ontime"}">${p.will_breach?"+"+p.over:"0"}</div></div>
+    </div></div></div>`;
+
+  // ---- breakdown
+  let brk="";
+  if(dc && dc.total>0){
+    const w=x=>Math.max(0,(x/dc.total)*100);
+    brk=`<div class="card"><div class="card-h">
+        <span>delay breakdown — how the codes partition the total</span>
+        <span>${dc.total} min total</span></div>
+      <div class="card-b"><div class="bar">
+        ${dc.late_inbound>0?`<div class="b-in" style="width:${w(dc.late_inbound)}%">${dc.late_inbound}</div>`:""}
+        ${dc.before_closure>0?`<div class="b-before" style="width:${w(dc.before_closure)}%">${dc.before_closure}</div>`:""}
+        ${dc.after_closure>0?`<div class="b-after" style="width:${w(dc.after_closure)}%">${dc.after_closure}</div>`:""}
+      </div><div class="legend">
+        <span><i style="background:var(--dim)"></i>late inbound ${dc.late_inbound} — arrived with it</span>
+        <span><i style="background:var(--amber)"></i>before closure ${dc.before_closure} — your window</span>
+        <span><i style="background:var(--cyan)"></i>after closure ${dc.after_closure} — outside it</span>
+      </div></div></div>`;
+  }
+
+  // ---- recommendation (tick state survives every re-render)
+  const bm = r.kind==="safety_hold"?["b-safety","safety hold"]
+           : r.kind==="recover"?["b-recover","recoverable"]
+           : r.kind==="monitor"?["b-monitor","monitoring"]
+           : ["b-manage","manage around"];
+  const acts=r.actions.map((a,i)=>{
+    const bn=a.startsWith("(still live)");
+    const txt=bn?a.replace("(still live)","").trim():a;
+    const on=ticked.has(a);
+    return `<li><input type="checkbox" id="ac${i}" ${on?"checked":""}
+      onchange="toggle(${JSON.stringify(a).replace(/"/g,"&quot;")})">
+      <label for="ac${i}" class="${bn?"beneath":""} ${on?"done":""}">${txt}</label></li>`;
+  }).join("");
+  const rec=`<div class="card"><div class="card-h">
+      <span>recommendation — proactive, never a stand-down</span>
+      <span>reasoner: ${r.backend}</span></div>
+    <div class="card-b"><span class="badge ${bm[0]}">${bm[1]}</span>
+      <h2 class="headline">${r.headline}</h2>
+      <ul class="acts">${acts}</ul>
+      <details><summary>why — the agent's reasoning</summary>
+        <ul class="reasons">${r.reasoning.map(x=>`<li>${x}</li>`).join("")}</ul>
+      </details></div></div>`;
+
+  $("out").innerHTML = ribbon + lead + calls + rec + attr + pred + brk
+                     + table + feedCard + chain;
+}
+
+function toggle(a){ ticked.has(a)?ticked.delete(a):ticked.add(a); show(); }
+
+/* ---------------- load a turn ---------------- */
+async function run(){
+  const payload=collect();
+  if(payload.scheduled_departure===null||payload.actual_in_block===null){
+    $("out").innerHTML=`<div class="card"><div class="card-b"><div class="err">
+      Scheduled departure and actual in-block are both required — the countdown
+      has no anchor without them.</div></div></div>`; return;
+  }
+  try{
+    const res=await fetch("/api/timeline",{method:"POST",
+      headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const d=await res.json();
+    if(d.error){ $("out").innerHTML=`<div class="card"><div class="card-b">
+      <div class="err">${d.error}</div></div></div>`; return; }
+    TL=d; TL.payload=payload; TL.actuals=payload.actuals;
+    TL.order=Object.keys(payload.actuals).sort((a,b)=>payload.actuals[a]-payload.actuals[b]);
+    labels={}; [...IN_FIELDS,...OUT_FIELDS].forEach(([k,l])=>labels[k]=l);
+    idx=0; ticked=new Set();
+    [trueAgent,trueCpm,trueDash]=firstCalls(TL.frames);
+    firstAgent=firstCpm=firstDash=null;
+    $("transport").hidden=false; $("tl").max=TL.frames.length-1;
+    show();
+  }catch(e){
+    $("out").innerHTML=`<div class="card"><div class="card-b"><div class="err">
+      Could not reach the engine. Is the server running?</div></div></div>`;
+  }
+}
+
+/* ---------------- wiring ---------------- */
+$("go").onclick=run;
+$("play").onclick=play;
+$("reset").onclick=()=>{stop(); idx=0; ticked=new Set(); if(TL) show();};
+$("tl").oninput=e=>{stop(); idx=+e.target.value; show();};
+$("s1").onclick=()=>setSpeed(1,"s1");
+$("s4").onclick=()=>setSpeed(4,"s4");
+$("s16").onclick=()=>setSpeed(16,"s16");
+$("clear").onclick=()=>{document.querySelectorAll('[data-k]').forEach(e=>e.value="");};
+
+function fill(cfg,v,rep){
+  $("turn").value=cfg.turn; $("ac").value=cfg.ac;
+  $("sched").value=cfg.sched; $("inblock").value=cfg.inblock;
+  $("prm").checked=!!cfg.prm; $("ema").checked=false;
+  $("safety").checked=!!cfg.safety;
+  $("rcode").value=rep?rep[0]:""; $("rat").value=rep?rep[1]:"";
+  document.querySelectorAll('[data-k]').forEach(e=>{ e.value=v[e.dataset.k]||""; });
+  run();
+}
+$("demo").onclick=()=>fill(
+  {turn:"DAYTIME_CREW_CHANGE",ac:"A320",sched:"09:00",inblock:"08:12",prm:true},
+  {in_block:"08:12",door1_open:"08:14",last_pax_off:"08:18",green_light:"08:25",
+   fuelling_start:"08:35",fuelling_end:"08:50",last_pax_on:"08:54",
+   gate_close:"08:56",door_closure:"08:59",off_block:"09:12"},
+  ["36","08:22"]);
+// The honest case: late inbound is known and provable at the same instant, so
+// the agent has nothing to add on timing. Kept deliberately -- a demonstration
+// that only ever flatters the system is not evidence.
+$("demo3").onclick=()=>fill(
+  {turn:"FIRST_WAVE",ac:"A320",sched:"06:40",inblock:"06:12",prm:false},
+  {in_block:"06:12",door1_open:"06:14",last_pax_off:"06:19",
+   fuelling_start:"06:32",green_light:"06:31",last_pax_on:"06:56",
+   gate_close:"06:58",door_closure:"07:04",off_block:"07:12"},
+  null);
+
+$("demo2").onclick=()=>fill(
+  {turn:"FIRST_WAVE",ac:"A321",sched:"06:55",inblock:"06:05",prm:true},
+  {in_block:"06:05",door1_open:"06:07",last_pax_off:"06:14",
+   fuelling_start:"06:26",fuelling_end:"06:38",green_light:"06:26",
+   last_prm_on:"06:41",last_pax_on:"06:46",gate_close:"06:48",
+   loadsheet_from_captain:"06:52",door_closure:"06:59",off_block:"07:14"},
+  ["41","06:20"]);
+</script>
+</body>
+</html>
