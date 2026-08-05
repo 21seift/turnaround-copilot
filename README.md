@@ -114,11 +114,13 @@ python -m turnaround_sim.demo                  # one turn, agent working
 python -m turnaround_sim.demo --safety         # hierarchy under a live hazard
 python -m turnaround_sim.demo --compare        # all three approaches, same turn
 
-python -m tests.test_hierarchy                 # constraint-layer invariants
+pytest tests/                                  # full regression suite
 python -m turnaround_sim.evaluate_emerging     # headline result
 python -m turnaround_sim.evaluate              # attribution / triage / action
 python -m turnaround_sim.compare_reasoners     # offline mock backend
 ```
+
+Runtime dependency: SimPy, with pytest for the test suite.
 
 With a language backend:
 
